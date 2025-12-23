@@ -2,11 +2,13 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
+import { ensureDatabase } from "@/lib/ensure-db";
 
 const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 export async function ensureDefaultAdminUser() {
+  await ensureDatabase();
   const existing = await prisma.adminUser.findUnique({
     where: { username: "admin" },
   });
@@ -25,6 +27,7 @@ export async function ensureDefaultAdminUser() {
 }
 
 export async function getAdminSession() {
+  await ensureDatabase();
   const cookieStore = cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE)?.value;
 
@@ -60,6 +63,7 @@ export async function requireAdminSession() {
 }
 
 export async function createAdminSession(username: string, password: string) {
+  await ensureDatabase();
   const adminUser =
     (await prisma.adminUser.findUnique({ where: { username } })) ??
     (username === "admin" ? await ensureDefaultAdminUser() : null);

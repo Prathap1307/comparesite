@@ -1,5 +1,6 @@
 import { type User } from "@clerk/nextjs/server";
 import prisma from "@/lib/db";
+import { ensureDatabase } from "@/lib/ensure-db";
 
 function getPrimaryEmail(user: User) {
   const primaryEmailId = user.primaryEmailAddressId;
@@ -26,6 +27,7 @@ function getPhone(user: User) {
 }
 
 export async function upsertCustomerFromClerk(user: User) {
+  await ensureDatabase();
   const email = getPrimaryEmail(user);
   const name = getDisplayName(user);
   const phone = getPhone(user);
@@ -47,6 +49,7 @@ export async function upsertCustomerFromClerk(user: User) {
 }
 
 export async function updateCustomerPhone(clerkUserId: string, phone: string) {
+  await ensureDatabase();
   return prisma.customer.update({
     where: { clerkUserId },
     data: { phone },
