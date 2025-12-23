@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  email       String
+  name        String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id          String   @id @default(cuid())
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id])
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+}
